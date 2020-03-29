@@ -15,41 +15,51 @@ boxplot(resamples5)
 
 #W oparciu o 100 prób bootstrapowych oszacuj średni wzrost.
 resamples100 <- lapply(1:100, function(i) sample(x, replace = T))
-boxplot(resamples100)
+#boxplot(resamples100)
 
 r.mean <- sapply(resamples100, mean)
 r.mean
+mean(r.mean)
 
 #W oparciu o próby bootstrapowe wylosowane w poprzednim kroku oszacuj błąd standardowy i obcążenia dla estymatora średniej z próby.
-sqrt(var(r.mean)) #błąd std[1]
-
-varnieob <- var(x)
-n <- length(x)
-varob <- varnieob*((n-1)/n)
-varnieob[2]
-varob[3]
-
-S2var <- function(X){
-  m <- mean(X)
-  v <- sum((x-m)^2)/(length(X))
-  return(v)
+standard.error <- function(x) { #błąd std.
+  sd(x)/sqrt(length(x))
 }
-rm.var <- sapply(resamples100, S2var)
-mean(rm.var) #średnia z obciążenia estymatora średniej z próby[4]
+mi <- mean(resamples100)
+e.mean <- sapply(resamaples100, mean) #estymatory średnich
+se <- standard.error(e.mean) #błąd std.
+bias <- mean(e.mean) - mi #obciążenie estyamtora średniej
 
 
-#Powtórz zadania z punktów (d) i (e) dla 200, 500, 1000 i 10000 prób bootsrapowych. Czy precyzja oszacowania zależy od ilości prób bootstrapowych?
+#Powtórz zadania z punktów (d) i (e) dla 200, 500, 1000 i 10000 prób bootsrapowych. 
+#Czy precyzja oszacowania zależy od ilości prób bootstrapowych?
   
+bootstrap <- function(X, n){ #X- wektor danych, n- liczba powtórzeń bootstrapowych
+  mi <- mean(X)
+  boot <- lapply(1:n, function(i) sample(X, replace = T))
+  e.mean <- sapply(boot, mean)
+  se <- standard.error(e.mean)
+  bias <- mean(e.mean) - mi 
+  structure(list("SE"=se, "obciążenie estymatora średniej"=bias))
+}
+
+bootstrap(x, 200)
+bootstrap(x, 500)
+bootstrap(x, 1000)
+bootstrap(x, 10000)
+
 #Oszacuj precyzję oszacowania mediany z próby w zależności od ilości prób bootstrapowych.
 
-
-#Sposób z wykładu
-n <- length(x)
-N <- 5
-stat <- numeric(N)
-for (i in 1:N){
-  a = sample(x, n, replace=T)
-  stat[i] = var(a)
+bootstrap_ES <- function(X, n, ES){ #X- wektor danych, n- liczba powtórzeń bootstrapowych, ES- estymator funkcji
+  mi <- ES(X)
+  boot <- lapply(1:n, function(i) sample(X, replace = T))
+  e <- sapply(boot, ES)
+  se <- standard.error(e)
+  bias <- mean(e) - mi 
+  structure(list("SE"=se, "obciążenie estymatora mediany"=bias))
 }
-boxplot(stat)
-stripchart(stat)
+
+bootstrap_ES(x, 200, median)
+bootstrap_ES(x, 500, median)
+bootstrap_ES(x, 1000, median)
+bootstrap_ES(x, 10000, median)

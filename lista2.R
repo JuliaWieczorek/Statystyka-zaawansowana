@@ -1,5 +1,5 @@
 #zad. 1 Wygenerować próbę 20 elementową z rozkładu normalnego
-x = rnorm(3, 0, 1)
+x = rnorm(20, 0, 1)
 hist(x)
 
 #zad. 2 Wyznaczyć estymator średniej korzystając z metody bootstrap oraz jackknife
@@ -46,6 +46,8 @@ jackknife2 <- function(X, ES) {
   bias <- mean(ests)- mi
   structure(list("SE" = se, "obciążenie estymatora średniej" = bias, "estymator średniej" = ests))}
 
+bootstrap(x, 20)
+jackknife2(x, mean)
 
 #zad. 4 Powtórzyć powyższe postępowanie 100-krotnie. 
 #Czy obie metody dają powtarzalne wyniki?
