@@ -1,15 +1,14 @@
 #zad. 1 Wygenerować próbę 20 elementową z rozkładu normalnego
-x = rnorm(20, 0, 1)
+x = rnorm(3, 0, 1)
 hist(x)
 
 #zad. 2 Wyznaczyć estymator średniej korzystając z metody bootstrap oraz jackknife
-boot <- lapply(1:20, function(i) sample(x, replace = T)) #metoda bootstrap
-e.mean <- sapply(boot, mean)
+#metoda bootstrap
+boot <- lapply(1:4, function(i) sample(x, replace = T)) 
+e.mean <- sapply(boot, mean) #oblicza średnia dla każdej z próby bootstrapowej
 e.mean
-hist(e.mean)
-mean(e.mean)
+hist(e.mean) #wyświetlanie histogramu rozkładu median
 
-#metoda jackknife
 jackknife <- function(X, ES) { #X - wektor danych, ES- funkcja estymująca (np. mean)
   n <- length(X)
   ests <- numeric(n)
@@ -29,40 +28,57 @@ S2var <- function(X){ #wariancja
 }
 
 bootstrap <- function(X, n){ #X- wektor danych, n- liczba powtórzeń bootstrapowych
+  mi <- mean(X)
   boot <- lapply(1:n, function(i) sample(X, replace = T))
-  se <- standard.error(X) #dodać obciążenie
   e.mean <- sapply(boot, mean)
-  rm.var <- sapply(boot, S2var)
-  ob <- mean(e.mean) #nie jestem pewna, które to będzie obciążenie estymatora śr.
-  structure(list("SE"=se, "obciążenie estymatora średniej"=rm.var, "estymator średniej" = e.mean))
+  se <- standard.error(e.mean)
+  bias <- mean(e.mean) - mi 
+  structure(list("SE"=se, "obciążenie estymatora średniej"=bias, "estymator średniej" = e.mean))
 }
 
-jackknife_sd <- function(X, ES) { #metoda jackknife z 
+jackknife2 <- function(X, ES) { 
+  mi <- mean(X) 
   n <- length(X)
   ests <- numeric(n)
   for (i in 1:n)
     ests[i] <- ES(X[-i])
   se = standard.error(ests)
-  ob <- sqrt((n-1) * mean((ests - mean(ests))^2))
-  structure(list("SE" = se, "obciążenie estymatora średniej" = ob, "estymator średniej" = ests))}
+  bias <- mean(ests)- mi
+  structure(list("SE" = se, "obciążenie estymatora średniej" = bias, "estymator średniej" = ests))}
 
 
 #zad. 4 Powtórzyć powyższe postępowanie 100-krotnie. 
 #Czy obie metody dają powtarzalne wyniki?
 #Czy jakąś metodę można uznać za lepszą?
 
+#powtórzenie 100-krotne
 for (i in 1:100){
   x = rnorm(20, 0, 1)
   print(bootstrap(x, 10))
-  print(jackknife_sd(x, mean))
+  print(jackknife2(x, mean))
 }
+
+#prób 100
+x = rnorm(100, 0, 1)
+bootstrap(x, 100)
+jackknife2(x, mean)
+
 
 #zad. 5 Wykonaż powyższe punkty dla dwóch innych wybranych rozkłądów prawdopodobieństwa.
 
+#powtórzenie 100-krotne
 X2 <- rchisq(20, df = 15)
+poisson <- rpois(20, lambda = 3)
 for (i in 1:100){
-  poisson <- rpois(20, lambda = 3)
-  bootstrap(X2, 5)
-  jackknife_sd(X2, mean)
-  bootstrap(poisson, 5)
-  jackknife_sd(poisson, mean)}
+  print(bootstrap(X2, 5))
+  print(jackknife_sd(X2, mean))
+  print(bootstrap(poisson, 5))
+  print(jackknife_sd(poisson, mean))}
+
+#prób 100
+X2 <- rchisq(100, df = 15)
+poisson <- rpois(100, lambda = 3)
+bootstrap(X2, 100)
+jackknife_sd(X2, mean)
+bootstrap(poisson, 100)
+jackknife2(poisson, mean)
