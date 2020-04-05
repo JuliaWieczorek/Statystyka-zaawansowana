@@ -85,27 +85,25 @@ t.test(k,n, paired=T)
 Wartość p-value = 0.2371 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
 
 ```{r message=TRUE, warning=TRUE}
-permutation_par <- function(x, y){
-  diff <- x-y
-  N<-10 #liczba permutacji
-  sumorig<-sum(diff)
-  n<-length(diff)
-  stat<-numeric(n)
-  stat_oryg<-t.test(x,y, paired=T) #wyznaczenie statystyki testowej dla oryginalnego zbioru danych
-  print (stat_oryg)
-  #p<-stat$p.value
-  cnt=0
-  for(i in 1:N){
-    for(j in 1:n){
-      stat[j]<-ifelse(t.test(x,y)$p.statistic < 0.5, diff[j], -diff[j])
-    }
-    if(sum(stat)>=sumorig)
-      cnt=cnt+1
-  }
-  p<-1/N
-  return (p) #p-value
+ni=length(k) 
+diff=n-k 
+N=400 
+sumoring=sum(diff) #suma roznic
+stat=c() 
+count=0 
+for (i in 1:N){
+  for (j in 1:ni){
+    stat[j]=ifelse(runif(1)<0.5, diff[j], -diff[j])}
+  if (sum(stat)>=sumoring) count=count+1
 }
-permutation_par(k,n)
+c=count/N 
+if(c<=0.5){
+  a=(c*2)
+  print(a)
+}else{
+  b=(2-c*2)
+  print(b)
+}
 ```
 
 
@@ -157,10 +155,9 @@ alfa = 0.05
 ```{r message=FALSE, warning=FALSE}
 m <- length (r2015)
 n <- length (r2017)
-#N <- choose (n+m, m) #liczba permutacji
-N <- 50 #liczba permutacji
+N <- 400 #liczba permutacji
 
-test = wilcox.test(r2015, r2017, alternative = 'less')$p.value
+test = wilcox.test(r2015, r2017, alternative = 'less')$statistic
 test
 counter = 0 
 z=c(r2015, r2017)
@@ -169,8 +166,8 @@ combin = combn((m+ n), m) #macierz możliwości
 for (i in 2: N){ # od i=2
   x1 <-z[combin[,i]]     
   y1 <-z[-combin[,i]]  
-  test2 = wilcox.test(x1,y1, alternative = 'less')$p.value
-  if( test2 <= test ){ counter = counter+1}  #porównanie statystyk 
+  test2 = wilcox.test(x1,y1, alternative = 'less')$statistic
+  if( test2 >= test ){ counter = counter+1}  #porównanie statystyk 
 }
 
 counter/N
@@ -201,18 +198,18 @@ n <- length(dane)
 m <- length(r2017)
 suma <- sum(dane)
 
-test_n <- wilcox.test(r2017, dane)$statistic #wg dokumentacji tzn 2-gi wieksze od 1-go argumentu
+test1 <- wilcox.test(r2017, dane)$statistic #wg dokumentacji tzn 2-gi wieksze od 1-go argumentu
 cnt <- 0 # licznik, zwiększany indykator
 z <- c(dane,r2017) #oba zbiory w jeden wektor
 combin <- combn((m+n),m) #macierz wszystkich kombinacji m-elementowych ze zbioru m+n-elementowego
 for (i in 2:N){ #od i=2, bo 
-  n_przed1 <- z[combin[,i]] #nowy wektor przed
-  n_po1 <- z[-combin[,i]] #nowy wektor po
-  n_test1 <- wilcox.test(n_przed1,n_po1)$statistic
-  if(n_test1 <= test_n){cnt=cnt+1} #wzrost indykatora, gdy prawdziwa nierówność
+  nx1 <- z[combin[,i]] 
+  ny1 <- z[-combin[,i]] 
+  test2 <- wilcox.test(nx1,ny1)$statistic
+  if(test2 <= test1){cnt=cnt+1} #wzrost indykatora, gdy prawdziwa nierówność
 }
 c <- cnt/N
-
+c
 if(c<=0.5){
   a=(c*2)
   print(a)
@@ -229,7 +226,6 @@ Wygeneruj próbe 100 par obserwacji z dwuwymiarowego rozkładu normalnego ze śr
 ```{r message=FALSE, warning=FALSE}
 library(mvtnorm)
 a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
-#a<- matrix(rnorm(30), ncol=2)
 n<-50
 
 library(bootstrap)
@@ -237,7 +233,23 @@ library(bootstrap)
 theta <- function(x, a){
   cor(a[x,1], a[x,2])
 }
-przedzial <- boott(1:n, theta, a, perc=c(0.95))
+przedzial <- boott(1:n, theta, a, perc=c(0.05, 0.95))
 przedzial[1]
+```
+
+```{r}
+library(mvtnorm)
+dane=rmvnorm(n=100,mean=c(0,0))
+cor.test(dane[,1],dane[,2])
+N=500
+przedzialy=matrix(nrow=N,ncol=2)
+colnames(przedzialy)=c("Lewy","Prawy")
+for (i in 1:N){
+  dane=rmvnorm(n=100,mean=c(0,0))
+  przedzialy[i,1]=cor.test(dane[,1],dane[,2])$conf[1]
+  przedzialy[i,2]=cor.test(dane[,1],dane[,2])$conf[2]
+}
+mean(przedzialy[,1])
+mean(przedzialy[,2])
 ```
 
