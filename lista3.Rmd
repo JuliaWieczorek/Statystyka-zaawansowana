@@ -84,7 +84,7 @@ t.test(k,n, paired=T)
 
 Wartość p-value = 0.2371 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
 
-```{r}
+```{r message=TRUE, warning=TRUE}
 permutation_par <- function(x, y){
   diff <- x-y
   N<-10 #liczba permutacji
@@ -97,7 +97,6 @@ permutation_par <- function(x, y){
   cnt=0
   for(i in 1:N){
     for(j in 1:n){
-      #stat[j]<-ifelse(runif(1) < 0.5, diff[j], -diff[j])
       stat[j]<-ifelse(t.test(x,y)$p.value < 0.5, diff[j], -diff[j])
     }
     if(sum(stat)>=sumorig)
@@ -142,4 +141,63 @@ shapiro.test(r2017)
 ```
 
 Wartość p jest mniejsza od założonej wartości alfa. Dane dotyczące średniej liczby kilometrów w 2017 roku nie pochodzi z rozkładu normalnego. 
+
+```{r}
+var2(r2015, r2017)
+```
+
+
+H0: Liczba przejechanych kilometrów w 2017 roku po zatankowaniu 10 litrów paliwa wynosi tyle samo, co w 2015roku
+HA: Liczba przejechanych kilometrów w 2017 roku po zatankowaniu 10 litrów paliwa wynosi mniej niż w 2015roku
+
+alfa = 0.05
+```{r message=FALSE, warning=FALSE}
+m <- length (r2015)
+n <- length (r2017)
+#N <- choose (n+m, m) #liczba permutacji
+N <- 50 #liczba permutacji
+
+test = wilcox.test(r2015, r2017, alternative = 'less')$p.value
+test
+counter = 0 
+z=c(r2015, r2017)
+combin = combn((m+ n), m) #macierz możliwości
+
+for (i in 2: N){ # od i=2
+  x1 <-z[combin[,i]]     
+  y1 <-z[-combin[,i]]  
+  test2 = wilcox.test(x1,y1, alternative = 'less')$p.value
+  if( test2 <= test ){ counter = counter+1}  #porównanie statystyk 
+}
+
+counter/N
+```
+
+Wartość p jest większa od założonej wartosci alfa, zatem nie mamy postaw do odrzucenia hipotezy zerowej. Liczba przejechanych kilometrów w 2017 roku po zatankowaniu 10 litrów paliwa wynosi tyle samo, co w 2015roku.
+
+
+zad.3 Rozważyć powyższe zadanie w sytuacji gdyby kierowca twierdził, że po dwóch latach użytkowania auta na tej samej ilości paliwa przejeżdża o około 10% kilometrów mniej.
+
+```{r}
+wynik=(((sum(r2015))/(length(r2015)))*100)/((sum(r2017))/(length(r2017)))
+wynik
+```
+
+7% więcej przejechanych kilometrów w 2015 roku.
+
+zad. 4 Wygeneruj próbe 100 par obserwacji z dwuwymiarowego rozkładu normalnego ze średnią μ = (0, 0) i macierzą kowariancji Σ = I. Wyznacz 95% bootstrapowe przedziaay ufności dla współczynnikóW korelacji.
+```{r}
+library(mvtnorm)
+a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
+#a<- matrix(rnorm(30), ncol=2)
+n<-50
+
+library(bootstrap)
+
+theta <- function(x, a){
+  cor(a[x,1], a[x,2])
+}
+przedzial <- boott(1:n, theta, a, perc=c(0.95))
+przedzial[1]
+```
 
