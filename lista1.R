@@ -22,9 +22,10 @@ r.mean
 mean(r.mean)
 
 #W oparciu o próby bootstrapowe wylosowane w poprzednim kroku oszacuj błąd standardowy i obcążenia dla estymatora średniej z próby.
-standard.error <- function(x) { #błąd std.
+standard.error <- function(x) { #błąd std. wystarczy sd()
   sd(x)/sqrt(length(x))
 }
+
 mi <- mean(resamples100)
 e.mean <- sapply(resamaples100, mean) #estymatory średnich
 se <- standard.error(e.mean) #błąd std.

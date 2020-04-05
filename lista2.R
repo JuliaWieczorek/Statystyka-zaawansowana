@@ -1,10 +1,14 @@
 #zad. 1 Wygenerować próbę 20 elementową z rozkładu normalnego
-x = rnorm(20, 0, 1)
+x = rnorm(20)
 hist(x)
 
 #zad. 2 Wyznaczyć estymator średniej korzystając z metody bootstrap oraz jackknife
 #metoda bootstrap
-boot <- lapply(1:4, function(i) sample(x, replace = T)) 
+boot <- lapply(1:1, function(i) sample(x, replace = T)) 
+      #lapply przechodzi przez zestaw danych, takich jak lista lub wektor, i wywołując określoną funkcję dla każdego elementu
+      #w tym wypadku tą funkcją jest sample, która losowo zmienia kolejność elementów
+      #1:4 oznacza ilość prób bootstrapowych
+
 e.mean <- sapply(boot, mean) #oblicza średnia dla każdej z próby bootstrapowej
 e.mean
 hist(e.mean) #wyświetlanie histogramu rozkładu median
@@ -14,7 +18,6 @@ jackknife <- function(X, ES) { #X - wektor danych, ES- funkcja estymująca (np. 
   ests <- numeric(n)
   for (i in 1:n)
     ests[i] <- ES(X[-i])
-    hist(ests)
     return (ests)}
 
 #zad. 3 Oszacuj błąd standardowy i obciążenia dla estymatora średniej.

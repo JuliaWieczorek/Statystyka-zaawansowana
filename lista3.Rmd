@@ -1,0 +1,145 @@
+---
+title: "lista 3"
+output: html_notebook
+---
+
+zad.1 W celu porównania dwóch różnych metod nauczania (klasycznej i innowacyjnej) 10-ciu losowo wybranych uczniów było najpierw nauczanych metodą klasyczną, a następnie podobny materiał był im przekazywany  metodą innowacyjną. Otrzymali oni następujące wyniki punktowe podczas testów:
+
+```{r}
+k <- c(65, 79, 90, 75, 61, 85, 98, 80, 97, 75)
+n <- c(90, 98, 73, 79, 84, 81, 98, 90, 83, 88)
+```
+
+Czy na poziomie istotno±ci 0.05 możemy twierdzić, że zastosowane metody są porównywalne?
+
+H0: Dane o uczniach nauczanych metodą klasyczną pochodzą z rozkładu normalnego.
+HA: Dane o uczniach nauczanych tą metodą nie pochodzą z rozkładu normalnego
+
+alfa = 0.05
+
+```{r}
+shapiro.test(k)
+```
+
+Wartość p-value = 0.7486 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej. Dane pochodzą z rozkładu normalnego.
+
+H0: Dane o uczniach nauczanych metodą innowacyjną pochodzą z rozkładu normalnego.
+HA: Dane o uczniach nauczanych tą metodą nie pochodzą z rozkładu normalnego
+
+alfa = 0.05
+
+```{r}
+shapiro.test(n)
+```
+
+Wartość p-value = 0.7655 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej. Dane pochodzą z rozkładu normalnego.
+
+H0: sigma = sigma
+HA: sigma =/ sigma
+
+alfa = 0.05
+
+```{r}
+var2=function(X,Y){
+varX=var(X)
+varY=var(Y)
+T=varX/varY
+nX=length(X)
+nY=length(Y)
+p=1-pf(T,nX-1,nY-1,lower.tail=TRUE)+pf(T,nX-1,nY-1,lower.tail=FALSE)
+list(stat=T,p_value=p)
+}
+```
+
+
+```{r}
+var2(k,n)
+var.test(k,n)
+```
+
+Wartość p-value = 0.2141 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
+
+Możemy przejść do wykonania testu t studenta dla dwóch prób zależnych.
+
+H0: Średnie wyniki testów będą takie same.
+HA: Średnie wyniki testów będą się różniły.
+
+alfa = 0.05
+
+```{r}
+t.test3=function(X,Y) {
+    D=Y-X
+    srD=mean(D)
+    osD=sd(D)
+    nD=length(D)
+    T=sqrt(nD)*(srD)/osD
+    p=pt(T,nD-1,lower.tail=TRUE)
+    list(stat=T,p_value=p)
+  }
+t.test3(k,n)
+t.test(k,n, paired=T)
+
+```
+
+
+Wartość p-value = 0.2371 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
+
+```{r}
+permutation_par <- function(x, y){
+  diff <- x-y
+  N<-10 #liczba permutacji
+  sumorig<-sum(diff)
+  n<-length(diff)
+  stat<-numeric(n)
+  stat_oryg<-t.test(x,y, paired=T) #wyznaczenie statystyki testowej dla oryginalnego zbioru danych
+  print (stat_oryg)
+  #p<-stat$p.value
+  cnt=0
+  for(i in 1:N){
+    for(j in 1:n){
+      #stat[j]<-ifelse(runif(1) < 0.5, diff[j], -diff[j])
+      stat[j]<-ifelse(t.test(x,y)$p.value < 0.5, diff[j], -diff[j])
+    }
+    if(sum(stat)>=sumorig)
+      cnt=cnt+1
+  }
+  p<-1/N
+  return (p) #p-value
+}
+permutation_par(k,n)
+```
+
+Zawsze wychodzi p=0.1... nie wiem co jest źle :/
+  
+zadanie.2 Pewien kierowca twierdzi, że z każdym rokiem jego auto zużywa więcej paliwa. Porównywał on liczbę przejechanych kilometrów po zatankowaniu 10 litrów paliwa teraz i przed dwoma laty.
+
+```{r}
+r2015 <- c(141.85, 134.36, 131.87, 137.28, 122.72, 136.44, 128.96, 136.86)
+r2017 <- c(125.10, 122.00, 123.10, 119.92, 124.11, 121.91, 122.00, 135.95, 127.10, 125.10)
+```
+
+Zwerykowa¢ czy jego przypuszczenie jest słuszne.
+
+
+H0: Dane dotyczące średniej liczby przejechanych kilometrów w 2015 roku pochodzi z r. norm.
+HA: Dane dotyczące średniej liczby kilometrów w 2015 roku nie pochodzi z r. norm.
+
+alfa = 0.05
+
+```{r}
+shapiro.test(r2015)
+```
+
+Wartość p jest większa od założonej wartości alfa, zatem nie mamy podstaw do odrzucenia hipotezy zerowej. Dane pochodzą z rozkładu normalnego.
+
+H0: Dane dotyczące średniej liczby przejechanych kilometrów w 2017 roku pochodzi z r. norm.
+HA: Dane dotyczące średniej liczby kilometrów w 2017 roku nie pochodzi z r. norm.
+
+alfa = 0.05
+
+```{r}
+shapiro.test(r2017)
+```
+
+Wartość p jest mniejsza od założonej wartości alfa. Dane dotyczące średniej liczby kilometrów w 2017 roku nie pochodzi z rozkładu normalnego. 
+
