@@ -233,9 +233,42 @@ library(bootstrap)
 theta <- function(x, a){
   cor(a[x,1], a[x,2])
 }
-przedzial <- boott(1:n, theta, a, perc=c(0.05, 0.95))
+przedzial <- boott(1:n, theta, a, perc=c(0.05, 0.95), nbootsd = 60, nboott = 200)
 przedzial[1]
+#nbootsd -> bootstrap od thety
+#nboott -> bootstap przedzialu
 ```
+
+
+```{r}
+a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
+N <- 50
+stat <- numeric(N)
+IQR <- numeric(N)
+
+for (i in 1: N){
+  z <- matrix(sample(a, replace=T), ncol=2, nrow=length(a)/2)
+  stat[i] <- cor(z[,1], z[,2])
+  #IQR [i] <- qnorm(0.995, 1/mean(z))-qnorm(0.25, 1/mean(z))
+}
+
+quantile(stat, c(0.05, 0.95))
+#quantile(IQR, c(0.05 ,0.95))
+```
+
+
+```{r}
+statS <- numeric (N)
+h <-0.5
+for (i in 1: N){
+  z <- sample (x , replace =T )
+  s <-(sum ((z - mean (z )) ^2) )/ length ( z)
+  x.new <-mean ( z) +(z - mean (z)+ h* rnorm ( length (z)))/ sqrt (1+(( h^2) /( s)))
+  statS [i] <- median (x.new)
+}
+quantile ( statS , c (0.05 , 0.95) )
+```
+
 
 ```{r}
 library(mvtnorm)
