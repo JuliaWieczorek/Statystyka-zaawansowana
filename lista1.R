@@ -22,7 +22,7 @@ r.mean
 mean(r.mean)
 
 #W oparciu o próby bootstrapowe wylosowane w poprzednim kroku oszacuj błąd standardowy i obcążenia dla estymatora średniej z próby.
-standard.error <- function(x) { #błąd std. wystarczy sd()
+standard.error <- function(x) { 
   sd(x)/sqrt(length(x))
 }
 
@@ -60,7 +60,13 @@ bootstrap_ES <- function(X, n, ES){ #X- wektor danych, n- liczba powtórzeń boo
   structure(list("SE"=se, "obciążenie estymatora mediany"=bias))
 }
 
-bootstrap_ES(x, 200, median)
-bootstrap_ES(x, 500, median)
-bootstrap_ES(x, 1000, median)
-bootstrap_ES(x, 10000, median)
+a <- bootstrap_ES(x, 200, median)
+b <- bootstrap_ES(x, 500, median)
+c <- bootstrap_ES(x, 1000, median)
+d <- bootstrap_ES(x, 10000, median)
+
+n <- c(a$SE, b$SE, c$SE, d$SE)
+m <- c(a$'obciążenie estymatora mediany', b$'obciążenie estymatora mediany', c$'obciążenie estymatora mediany', d$'obciążenie estymatora mediany')
+df<-data.frame(n,m)
+colnames(df)<-c('SE', 'obciążenie estymatora mediany')
+rownames(df)<-c(200, 500, 1000, 10000)

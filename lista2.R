@@ -52,6 +52,14 @@ jackknife2 <- function(X, ES) {
 bootstrap(x, 20)
 jackknife2(x, mean)
 
+boot20<-numeric(length(proba))
+for (i in 1:20) boot20[i]<-mean(sample(proba, 20, replace=T))
+mean(boot20)
+obc_s=abs(mean(proba)-mean(boot20))
+obc_s
+blad_s=sd(boot20)/sqrt(length(boot20))
+blad_s
+
 #zad. 4 Powtórzyć powyższe postępowanie 100-krotnie. 
 #Czy obie metody dają powtarzalne wyniki?
 #Czy jakąś metodę można uznać za lepszą?

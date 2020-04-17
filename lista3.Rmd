@@ -19,57 +19,11 @@ n <- c(90, 98, 73, 79, 84, 81, 98, 90, 83, 88)
 
 Czy na poziomie istotno±ci 0.05 możemy twierdzić, że zastosowane metody są porównywalne?
 
-H0: Dane o uczniach nauczanych metodą klasyczną pochodzą z rozkładu normalnego.
-
-HA: Dane o uczniach nauczanych tą metodą nie pochodzą z rozkładu normalnego
-
-alfa = 0.05
-
-```{r}
-shapiro.test(k)
-```
-
-Wartość p-value = 0.7486 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej. Dane pochodzą z rozkładu normalnego.
-
-H0: Dane o uczniach nauczanych metodą innowacyjną pochodzą z rozkładu normalnego.
-
-HA: Dane o uczniach nauczanych tą metodą nie pochodzą z rozkładu normalnego
-
-alfa = 0.05
-
-```{r}
-shapiro.test(n)
-```
-
-Wartość p-value = 0.7655 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej. Dane pochodzą z rozkładu normalnego.
-
-H0: sigma = sigma
-
-HA: sigma =/ sigma
-
-alfa = 0.05
-
-```{r}
-var2=function(X,Y){
-varX=var(X)
-varY=var(Y)
-T=varX/varY
-nX=length(X)
-nY=length(Y)
-p=1-pf(T,nX-1,nY-1,lower.tail=TRUE)+pf(T,nX-1,nY-1,lower.tail=FALSE)
-list(stat=T,p_value=p)
-}
-```
 
 
-```{r}
-var2(k,n)
-var.test(k,n)
-```
+Te dane nie są z rozkładu normalnego, bo są typu skokowego! Poza tym powinno się to liczyć z całego wektora, a nie pojedynczo. Patrzymy na próbę, a nie na poszczególne próby danych.
 
-Wartość p-value = 0.2141 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
-
-Możemy przejść do wykonania testu t studenta dla dwóch prób zależnych.
+Możemy przejść do wykonania wilcoxona.
 
 H0: Średnie wyniki testów będą takie same.
 
@@ -78,11 +32,11 @@ HA: Średnie wyniki testów będą się różniły.
 alfa = 0.05
 
 ```{r}
-t.test(k,n, paired=T)
+wilcox.test(k,n, paired=T)
 ```
 
 
-Wartość p-value = 0.2371 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
+Wartość p-value = 0.26 jest większa od założonej wartoci alfa = 0.05, zatem nie mamy podstaw do odrzcuenia hipotezy zerowej.
 
 ```{r message=TRUE, warning=TRUE}
 ni=length(k) 
@@ -97,6 +51,29 @@ for (i in 1:N){
   if (sum(stat)>=sumoring) count=count+1
 }
 c=count/N 
+if(c<=0.5){
+  a=(c*2)
+  print(a)
+}else{
+  b=(2-c*2)
+  print(b)
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+N=400 #liczba permutacji
+ni=length(k) #ilosc par
+
+dane_cale=cbind(k,n)
+test=t.test(k,n,paired=TRUE,var.equal=TRUE)$statistic
+counter=0 # licznik
+for (i in 1: N ){
+  for (j in 1: ni ){
+    dane_cale[j,]=sample(dane_cale[j,],2)}
+  test1<-wilcox.test(dane_cale[,1],dane_cale[,2],paired=TRUE,var.equal = TRUE)$statistic
+  if (test1 >= test) {counter=counter+1}}
+c <- counter/N
+c
 if(c<=0.5){
   a=(c*2)
   print(a)
@@ -191,16 +168,16 @@ H0: 2015r x km = 2017 0.9x km
 HA: 2015r x km != 2017 0.9x km
 
 ```{r message=FALSE, warning=FALSE}
-dane <- r2017*0.9
+dane <- r2015*0.9
 shapiro.test(dane) #pochodzi z rozkladu normalnego
 N <- 400 
 n <- length(dane)
 m <- length(r2017)
 suma <- sum(dane)
 
-test1 <- wilcox.test(r2017, dane)$statistic #wg dokumentacji tzn 2-gi wieksze od 1-go argumentu
+test1 <- wilcox.test(r2015, dane)$statistic #wg dokumentacji tzn 2-gi wieksze od 1-go argumentu
 cnt <- 0 # licznik, zwiększany indykator
-z <- c(dane,r2017) #oba zbiory w jeden wektor
+z <- c(dane,r2015) #oba zbiory w jeden wektor
 combin <- combn((m+n),m) #macierz wszystkich kombinacji m-elementowych ze zbioru m+n-elementowego
 for (i in 2:N){ #od i=2, bo 
   nx1 <- z[combin[,i]] 
@@ -225,6 +202,7 @@ Wygeneruj próbe 100 par obserwacji z dwuwymiarowego rozkładu normalnego ze śr
 
 ```{r message=FALSE, warning=FALSE}
 library(mvtnorm)
+set.seed(1)
 a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
 n<-50
 
@@ -241,7 +219,7 @@ przedzial[1]
 
 
 ```{r}
-a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
+#a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
 N <- 50
 stat <- numeric(N)
 IQR <- numeric(N)
