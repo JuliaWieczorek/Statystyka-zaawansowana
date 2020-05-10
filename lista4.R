@@ -169,58 +169,61 @@ vartest(elem1v1, elem2, 200)
 
 #literówka z zadaniu X1Y1 albo Y1X1 przyjmuje wartosc 1.78
 
-macierz <- rbind(c(0.00, 2.21, 2.49, 1.78, 3.11, 2.94),
+macierz3 <- rbind(c(0.00, 2.21, 2.49, 1.78, 3.11, 2.94),
       c(2.21, 0.00, 2.60, 3.27, 1.45, 3.29),
       c(2.49, 2.60, 0.00, 2.14, 0.43, 3.52),
       c(1.78, 3.27, 2.14, 0.00, 2.69, 2.60),
       c(3.11, 1.45, 0.43, 2.69, 0.00, 3.48),
       c(2.94, 3.29, 3.52, 2.60, 3.48, 0.00))
-colnames(macierz) <- c('X1', 'X2', 'X3', 'Y1', 'Y2', 'Y3')
-rownames(macierz) <- c('X1', 'X2', 'X3', 'Y1', 'Y2', 'Y3')
-dane <- data.frame(macierz)
-dane
+colnames(macierz3) <- c('X1', 'X2', 'X3', 'Y1', 'Y2', 'Y3')
+rownames(macierz3) <- c('X1', 'X2', 'X3', 'Y1', 'Y2', 'Y3')
+dane3 <- data.frame(macierz3)
+dane3
 library(FNN)
 
 statysytkaKNN <- function(dane, neighbour, wartosc){ #dane w data.frame, liczba dla którego sąsiada, dlugosc pierwsego wektora
   NS <- get.knn(dane, k=neighbour)
   index <- NS$nn.index
-  i1 <- sum(index <= wartosc)
-  i2 <- sum(index > wartosc)
+  block1 <- NS$nn.index[1:3, ]
+  block2 <- NS$nn.index[4:6, ]
+  i1 <- sum(block1 <= wartosc)
+  i2 <- sum(block2 > wartosc)
   wektor <- c(i1, i2)
   statysytka <- sum(wektor)/neighbour*nrow(dane)
   return(statysytka)
 }
-wartosc <- nrow(dane)/2
-statysytkaKNN(macierz, 3, wartosc)
+wartosc3 <- nrow(dane3)/2
+statysytkaKNN(macierz3, 3, wartosc3)
 
 
 # zadanie 4
-X <- matrix(rnorm(5, mean=5, sd=3))
-Y <- matrix(rnorm(6, mean=5, sd=3))
-macierz4 <- rbind(X, Y)
+X4 <- matrix(rnorm(15, mean=5, sd=sqrt(3)), 5, 5)
+Y4 <- matrix(rnorm(15, mean=5, sd=sqrt(3)), 6, 5)
+
+macierz4 <- rbind(X4, Y4)
 o <- rep(0, nrow(macierz4))
-dane <- data.frame(cbind(macierz4, o))
-dane
-library(FNN)
-NS <- get.knn(dane, k=nrow(macierz4)-1)
+dane4 <- data.frame(macierz4, o)
+dane4
+#library(FNN)
+NS4 <- get.knn(dane4, k=nrow(macierz4)-1)
 
 # a) W oparciu o wygenerowane macierze obserwacji, dla każdego elementu
 #macierzy Z wyznacz indeks k-tego najbliższego sąsiada
-NS$nn.index
+NS4$nn.index
 
 # b) W oparciu o macierz wyznaczoną w poprzednim punkcie wyznacz
 #wartosci statystyk pierwszych, trzecich i piątych najblizszych
 #sąsiadów
-w <- length(X)
-statysytkaKNN(dane, 1, w)
-statysytkaKNN(dane, 3, w)
-statysytkaKNN(dane, 5, w)
+w4 <- length(X4)
+statysytkaKNN(dane4, 1, w4)
+statysytkaKNN(dane4, 3, w4)
+statysytkaKNN(dane4, 5, w4)
 
 #c)
 bootstrapKNN <- function(X, wartosc, n, neighbour){ #X- wektor danych, n- liczba powtórzeń bootstrapowych
   N1 <- statysytkaKNN(X, neighbour, wartosc) #statystyka oryginalna
-  boot <- lapply(1:n, function(i) sample(X, replace = T)) #próby bootstrapowe
-  n.test <- sapply(boot, function(i) statysytkaKNN(X, neighbour, wartosc)) #statystyki bootstrapowe
+  boot <- lapply(1:n, function(i) sample(as.matrix(X), replace = T)) #próby bootstrapowe
+  n.test <- sapply(boot, function(i) statysytkaKNN(as.matrix(i), neighbour, wartosc)) #statystyki bootstrapowe
   cnt <- 0 #licznik
   for (i in 1:length(n.test)){
     if(n.test[i]>=N1){cnt=cnt+1}
@@ -228,28 +231,51 @@ bootstrapKNN <- function(X, wartosc, n, neighbour){ #X- wektor danych, n- liczba
   p_value <- (cnt+1)/(n+1)
   return((p_value))}
 
-bootstrapKNN(dane, w, 10, nrow(dane)-1)
+bootstrapKNN(dane4, w4, 10, nrow(dane4)-1)
 
 # zadanie 5
-X <- matrix(rnorm(5))
-Y <- matrix(rnorm(6))
-macierz4 <- rbind(X, Y)
-o <- rep(0, nrow(macierz4))
-dane <- data.frame(cbind(macierz4, o))
-dane
+X5<-matrix(rnorm(15, mean=5,sd=sqrt(3)),5,5)
+Y5<-matrix(rnorm(15, mean=1,sd=1),6,5)
+macierz5 <- rbind(X5, Y5)
+o <- rep(0, nrow(macierz5))
+dane5 <- data.frame(cbind(macierz5, o))
+dane5
 library(FNN)
-NS <- get.knn(dane, k=nrow(macierz4)-1)
+NS5 <- get.knn(dane5, k=nrow(macierz5)-1)
 
 #a)
-NS$nn.index
+NS5$nn.index
 
 #b)
-w <- length(X)
-statysytkaKNN(dane, 1, w)
-statysytkaKNN(dane, 3, w)
-statysytkaKNN(dane, 5, w)
+statysytkaKNN <- function(dane, neighbour, wartosc){ #wartosc <- dlugosc pierwszego wektora
+  NS <- get.knn(dane, k=neighbour)
+  index <- NS$nn.index
+  block1 <- NS$nn.index[1:3, ]
+  block2 <- NS$nn.index[4:6, ]
+  i1 <- sum(block1 <= wartosc)
+  i2 <- sum(block2 > wartosc)
+  wektor <- c(i1, i2)
+  statysytka <- sum(wektor)/neighbour*nrow(dane)
+  return(statysytka)
+}
+
+w5 <- length(X5)
+statysytkaKNN(dane5, 1, w5)
+statysytkaKNN(dane5, 3, w5)
+statysytkaKNN(dane5, 5, w5)
 
 #c)
-bootstrapKNN(dane, w, 10, nrow(dane)-1)
+bootstrapKNN <- function(X, wartosc, n, neighbour){ #X- wektor danych, n- liczba powtórzeń bootstrapowych
+  N1 <- statysytkaKNN(X, neighbour, wartosc) 
+  boot <- lapply(1:n, function(i) sample(as.matrix(X), replace = T)) 
+  n.test <- sapply(boot, function(i) statysytkaKNN(as.matrix(i), neighbour, wartosc))
+  cnt <- 0
+  for (i in 1:length(n.test)){
+    if(n.test[i]>=N1){cnt=cnt+1}
+  }
+  p_value <- (cnt+1)/(n+1)
+  return((p_value))}
+
+bootstrapKNN(dane5, w5, 10, nrow(dane5)-1)
 
 

@@ -99,7 +99,7 @@ if(c<=0.5){
 
 #zad. 4 
 library(mvtnorm)
-a<-matrix(rmvnorm(100, mean(0,0)), ncol=2)
+a<-matrix(rmvnorm(100, mean(0,0)), sigma=diag(2), ncol=2)
 n<-50
 
 library(bootstrap)
